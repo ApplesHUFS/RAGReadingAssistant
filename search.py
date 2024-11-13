@@ -1,20 +1,55 @@
 from typing import List, Dict, Any
 import numpy as np
-from rank_bm25 import BM25Okapi
-from utils import cosine_similarity, get_embedding, RELEVANCE_THRESHOLD
+import faiss
+from utils import get_embedding, RELEVANCE_THRESHOLD
+
+class FAISSIndex:
+    def __init__(self):
+        self.index = None
+        self.chunk_data = []
+        
+    def build_index(self, chunks: List[Dict[str, Any]]):
+        embeddings = []
+        self.chunk_data = []
+        
+        for chunk in chunks:
+            embeddings.append(chunk['embedding'])
+            self.chunk_data.append({
+                'pdf_id': chunk['pdf_id'],
+                'page_number': chunk['page_number'],
+                'sentence_chunk': chunk['sentence_chunk']
+            })
+        
+        embeddings_array = np.array(embeddings).astype('float32')
+        
+        dimension = embeddings_array.shape[1]
+        self.index = faiss.IndexFlatIP(dimension)
+        faiss.normalize_L2(embeddings_array)  
+        self.index.add(embeddings_array)
+    
+    def search(self, query: str, k: int = 5) -> List[Dict[str, Any]]:
+        query_embedding = np.array([get_embedding(query)]).astype('float32')
+        faiss.normalize_L2(query_embedding)
+        
+        scores, indices = self.index.search(query_embedding, k)
+        scores = scores[0]  
+        indices = indices[0]  
+        
+        results = []
+        for score, idx in zip(scores, indices):
+            if score >= RELEVANCE_THRESHOLD:
+                chunk_info = self.chunk_data[idx]
+                results.append({
+                    **chunk_info,
+                    'relevance_score': float(score)
+                })
+        
+        return results
+
+faiss_index = FAISSIndex()
 
 def search(query: str, chunks: List[Dict[str, Any]], k: int = 5) -> List[Dict[str, Any]]:
-    query_embedding = get_embedding(query)
-
-    scored_results = []
-    for chunk in chunks:
-        score = cosine_similarity(query_embedding, chunk['embedding'])
-        
-        if score >= RELEVANCE_THRESHOLD:
-            scored_results.append({
-                **chunk,
-                'relevance_score': score
-            })
-
-    scored_results.sort(key=lambda x: x['relevance_score'], reverse=True)
-    return scored_results[:k]
+    if faiss_index.index is None:
+        faiss_index.build_index(chunks)
+    
+    return faiss_index.search(query, k)

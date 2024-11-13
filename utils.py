@@ -7,7 +7,7 @@ MAX_CONTEXT_LENGTH = 5000
 
 RELEVANCE_THRESHOLD = 0.35
 
-model = SentenceTransformer('all-mpnet-base-v2')
+model = SentenceTransformer('jhgan/ko-sbert-nli')
 
 def get_embedding(text: str) -> List[float]:
     return model.encode(text).tolist()

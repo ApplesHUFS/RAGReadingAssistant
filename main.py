@@ -48,6 +48,7 @@ RAG 파이프라인 실행 순서
         텍스트 청크와 임베딩이 포함된 CSV 파일 읽고-> .read_csv(file_path)
         embedding 컬럼을 numpy array로 변환하고 -> .apply(lambda x: np.fromstring(x.strip("[]"), sep=" "))
         DataFrame을 dictionary 형태로 변환하기 (.to_dict(orient="records")) 
+        데이터베이스 (2차원 표; 엑셀 형태) => 딕셔너리로 변했습니다. => {'chunk':청크들, 'embedding':숫자들}
 
 2. GPT 프로세스 (gpt_integration.py)
     2-1. get_gpt_answer(query, processed_data) 실행
@@ -59,9 +60,9 @@ RAG 파이프라인 실행 순서
 3. 검색 프로세스 (search.py)
     - search(query, chunksm, k) 함수에서
         utils.py의 get_embedding(text)으로 쿼리 임베딩 생성하고 -> model.encode(text).tolist()
-        각 청크와 쿼리 임베딩 간 코사인 유사도 계산하고 -> cosine_similarity(query_embedding, chunk['embedding'])
+        각 청크와 쿼리 임베딩 간 코사인 유사도 계산하고 -> cosine_similarity(query_embedding, chunk['embedding']) =>{'chunk':청크들, 'embedding':숫자들, 'relevance_score': 값}
         RELEVANCE_THRESHOLD(0.35) 기준으로 청크 필터링하고 -> if score >= RELEVANCE_THRESHOLD
-        유사도 점수로 정렬하고 -> sort(key=lambda x: x['relevance_score'], reverse=True)
+        유사도 점수로 정렬하고 -> sort(key=lambda x: x['relevance_score'], reverse=True) => [{dic1}, {dic2},{dic3}] => [가장 비슷1, 가장비슷2,,,]
         상위 k개 청크 반환하기 -> scored_results[:k]
 
 4. 답변 생성 프로세스 (다시 gpt_integration.py)
@@ -88,31 +89,4 @@ RAG 파이프라인 실행 순서
     - gpt_integration.py: GPT 통합, 프롬프트 관리
     - search.py: 텍스트 청크 검색 로직
     - utils.py: 임베딩, 유사도 계산 등 유틸리티
-"""
-
-
-
-"""
-1. 원하는 폴더로 이동하기
-    cd "폴더경로"
-    ex: cd "E:\2024\영대 학술제 준비\implementation\Code"
-
-2. git 초기화하기
-    git init
-
-3. .gitignore 설정 (큰 파일 제외)
-
-4. 파일 추가 및 커밋하기
-    git add .
-    git commit -m "feat: 초기 커밋"
-
-5. main 브랜치 생성하기
-    git branch -M main
-
-6. 원격 저장소 연결하기
-    git remote add origin https://github.com/사용자명/저장소이름.git
-    예: git remote add origin https://github.com/ApplesHUFS/AcademicFestival.git
-
-7. 푸시하기
-git push -f origin main
 """
