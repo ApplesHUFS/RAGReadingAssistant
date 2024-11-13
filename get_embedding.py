@@ -58,7 +58,6 @@ def create_chunks(pages_and_texts):
 
 @functools.lru_cache(maxsize=1000)
 def get_embedding(text, model):
-    """Cache embeddings for identical text chunks"""
     return model.encode(text)
 
 def create_embeddings(pages_and_chunks, model):
@@ -66,7 +65,7 @@ def create_embeddings(pages_and_chunks, model):
         item["embedding"] = get_embedding(item["sentence_chunk"], model)
     return pages_and_chunks
 
-def process_pdf_directory(pdf_dir, output_path, model_name="all-mpnet-base-v2", device="cpu"):
+def process_pdf_directory(pdf_dir, output_path, model_name="jhgan/ko-sbert-nli", device="cpu"):
     pdf_files = [f for f in os.listdir(pdf_dir) if f.endswith('.pdf')]
     
     if not pdf_files:
