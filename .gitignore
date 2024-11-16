@@ -3,3 +3,6 @@ human-nutrition-text.pdf
 get_embedding_recipe.py 
 **pycache** 
 .history/ 
+processed_files/
+text_files/
+MakeData.py

@@ -4,7 +4,7 @@ import os
 from search import search
 from utils import MAX_CONTEXT_LENGTH
 
-client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY", "api_key"))
+client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY", "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"))
 
 PROMPT_TEMPLATE = """Based on the following context items, please answer the query.
 Give yourself room to think by extracting relevant passages from the context before answering the query.
@@ -28,6 +28,8 @@ Answer:"""
 
 def generate_prompt(query: str, chunks: List[Dict[str, Any]], k: int = 5) -> str:
     relevant_chunks = search(query, chunks, k)
+
+    print(relevant_chunks)
 
     context = ""
     total_length = 0
