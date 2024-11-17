@@ -1,0 +1,236 @@
+from typing import List, Dict, Any, Tuple
+import numpy as np
+import faiss
+from rank_bm25 import BM25Okapi
+from utils import get_embedding, RELEVANCE_THRESHOLD
+from thefuzz import fuzz
+import re
+from konlpy.tag import Okt
+
+class FAISSIndex:
+    def __init__(self):
+        self.index = None
+        self.chunk_data = []
+        self.bm25 = None
+        self.titles = []
+        self.title_to_chunks = {}
+        self.okt = Okt()
+    
+    def build_index(self, chunks: List[Dict[str, Any]]):
+        embeddings = []
+        self.chunk_data = []
+        normalized_titles = {}
+        
+        for chunk in chunks:
+            embeddings.append(chunk['embedding'])
+            self.chunk_data.append(chunk)
+            
+            title = chunk['pdf_id']
+            normalized_title = self._normalize_korean_title(title)
+            
+            if normalized_title not in normalized_titles:
+                self.titles.append(title)
+                normalized_titles[normalized_title] = title
+                self.title_to_chunks[title] = []
+            self.title_to_chunks[title].append(chunk)
+        
+        # 제목과 내용을 모두 고려한 토큰화
+        tokenized_data = []
+        for title in self.titles:
+            tokens = self._tokenize_korean_title(title)
+            # 해당 제목의 모든 청크에서 주요 명사 추출
+            for chunk in self.title_to_chunks[title]:
+                content_tokens = self._tokenize_content(chunk['sentence_chunk'])
+                tokens.extend(content_tokens)
+            tokenized_data.append(list(set(tokens)))  # 중복 제거
+        
+        self.bm25 = BM25Okapi(tokenized_data)
+        
+        embeddings_array = np.array(embeddings).astype('float32')
+        dimension = embeddings_array.shape[1]
+        self.index = faiss.IndexFlatIP(dimension)
+        faiss.normalize_L2(embeddings_array)
+        self.index.add(embeddings_array)
+
+    def search_title(self, query: str, threshold: float = 0.30) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+        # 1단계: 입력 쿼리 정규화
+        normalized_query = self._normalize_korean_title(query)
+        tokenized_query = self._tokenize_korean_title(query)
+        
+        # 2단계: 완전 일치 검색
+        exact_matches = []
+        for title in self.titles:
+            normalized_title = self._normalize_korean_title(title)
+            
+            # 제목 부분만 비교 (저자 제외)
+            title_only = self._remove_author(normalized_title)
+            query_only = self._remove_author(normalized_query)
+            
+            if query_only in title_only or title_only in query_only:
+                exact_matches.append({
+                    'title': title,
+                    'score': 100,
+                    'chunks': self.title_to_chunks[title]
+                })
+        
+        if exact_matches:
+            return self._process_matching_results(exact_matches)
+        
+        # 3단계: 유사도 기반 검색
+        matching_results = []
+        bm25_scores = self.bm25.get_scores(tokenized_query)
+        
+        for idx, title in enumerate(self.titles):
+            normalized_title = self._normalize_korean_title(title)
+            title_only = self._remove_author(normalized_title)
+            query_only = self._remove_author(normalized_query)
+            
+            # 문자열 유사도
+            str_ratio = fuzz.ratio(query_only, title_only)
+            
+            # 초성 매칭
+            query_chars = self._get_korean_chars(query_only)
+            title_chars = self._get_korean_chars(title_only)
+            char_ratio = fuzz.ratio(query_chars, title_chars)
+            
+            # 토큰 유사도
+            token_ratio = fuzz.token_sort_ratio(query_only, title_only)
+            
+            # BM25 점수
+            normalized_bm25 = min(100, (bm25_scores[idx] * 60))
+            
+            # 최종 점수 계산
+            final_score = (
+                str_ratio * 0.3 +
+                char_ratio * 0.3 +
+                token_ratio * 0.2 +
+                normalized_bm25 * 0.2
+            )
+            
+            if final_score >= (threshold * 100):
+                matching_results.append({
+                    'title': title,
+                    'score': final_score,
+                    'chunks': self.title_to_chunks[title]
+                })
+        
+        matching_results.sort(key=lambda x: x['score'], reverse=True)
+        return self._process_matching_results(matching_results)
+
+    def _process_matching_results(self, matching_results: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+        similar_titles = [
+            {
+                'title': result['title'],
+                'score': result['score']
+            }
+            for result in matching_results[:8]
+        ]
+
+        if matching_results:
+            top_chunks = []
+            for result in matching_results[:6]:
+                top_chunks.extend(result['chunks'])
+            return top_chunks, similar_titles
+        
+        return [], similar_titles
+
+    def search_content(self, query: str, chunks: List[Dict[str, Any]], k: int = 10) -> List[Dict[str, Any]]:
+        query_embedding = get_embedding(query)
+        faiss.normalize_L2(query_embedding)
+        
+        chunk_indices = [i for i, chunk in enumerate(self.chunk_data) if chunk in chunks]
+        
+        if not chunk_indices:
+            return []
+        
+        # 전체 검색 후 관련된 청크만 필터링
+        scores, indices = self.index.search(query_embedding, len(chunk_indices))
+        scores = scores[0]
+        indices = indices[0]
+        
+        results = []
+        seen_contents = set()  # 중복 내용 제거를 위한 집합
+        
+        for score, idx in zip(scores, indices):
+            if idx in chunk_indices and score >= RELEVANCE_THRESHOLD:
+                chunk = self.chunk_data[idx]
+                content = chunk['sentence_chunk']
+                
+                # 중복 내용 건너뛰기
+                if content in seen_contents:
+                    continue
+                    
+                seen_contents.add(content)
+                results.append({
+                    **chunk,
+                    'relevance_score': float(score)
+                })
+                
+                if len(results) >= k:
+                    break
+        
+        return results
+
+    def _normalize_korean_title(self, title: str) -> str:
+        # 공백 제거 및 소문자 변환
+        title = ''.join(title.split())
+        # 괄호와 내용 제거 (선택적)
+        title = re.sub(r'\([^)]*\)', '', title)
+        # 특수문자 제거 (한글, 영문, 숫자 유지)
+        title = re.sub(r'[^\w\s가-힣]', '', title)
+        return title.lower()
+    
+    def _remove_author(self, title: str) -> str:
+        # 마지막 2-3글자가 이름인 경우 제거
+        parts = title.split()
+        if len(parts) > 1 and len(parts[-1]) <= 3:
+            return ''.join(parts[:-1])
+        return title
+    
+    def _tokenize_korean_title(self, title: str) -> List[str]:
+        normalized = self._normalize_korean_title(title)
+        # 형태소 분석
+        morphs = self.okt.morphs(normalized)
+        # 명사 추출
+        nouns = self.okt.nouns(normalized)
+        # 중복 제거하여 반환
+        return list(set(morphs + nouns))
+    
+    def _tokenize_content(self, text: str) -> List[str]:
+        normalized = self._normalize_korean_title(text)
+        # 주요 명사만 추출
+        nouns = self.okt.nouns(normalized)
+        return list(set(nouns))
+    
+    def _get_korean_chars(self, text: str) -> str:
+        result = []
+        for char in text:
+            if '가' <= char <= '힣':
+                # 초성만 추출
+                result.append(chr((ord(char) - 0xAC00) // 28 // 21 + 0x1100))
+            else:
+                result.append(char)
+        return ''.join(result)
+
+    def get_all_titles(self) -> List[str]:
+        return self.titles
+
+faiss_index = FAISSIndex()
+
+def search(query: str, chunks: List[Dict[str, Any]], k: int = 10) -> List[Dict[str, Any]]:
+    if faiss_index.index is None:
+        faiss_index.build_index(chunks)
+    return faiss_index.search_content(query, chunks, k)
+
+def search_content(query: str, chunks: List[Dict[str, Any]], k: int = 10) -> List[Dict[str, Any]]:
+    if faiss_index.index is None:
+        faiss_index.build_index(chunks)
+    return faiss_index.search_content(query, chunks, k)
+
+def search_title(query: str) -> List[Dict[str, Any]]:
+    chunks, similar_titles = faiss_index.search_title(query)
+    print(similar_titles)
+    return chunks
+
+def get_all_titles() -> List[str]:
+    return faiss_index.get_all_titles()

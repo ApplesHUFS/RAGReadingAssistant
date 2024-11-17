@@ -1,0 +1,6 @@
+**pycache** 
+.history/ 
+book_data.csv
+processed_files/
+text_files/
+saved_index/
