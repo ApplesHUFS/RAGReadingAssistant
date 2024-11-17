@@ -1,10 +1,16 @@
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
+
+# Virtual Environment
 env/
 venv/
+ENV/
+
+# Distribution / packaging
 build/
 develop-eggs/
 dist/
@@ -16,12 +22,33 @@ lib64/
 parts/
 sdist/
 var/
+wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+
+# Environment variables
 .env
+
+# Project specific
 data/
+processed_books/
+
+# IDE
 .vscode/
 .idea/
+.vs/
+
+# Logs
 *.log
+logging/
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Editor histories
 .history/
+*~
+*.swp
+*.swo
