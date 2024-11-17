@@ -1,4 +1,4 @@
-from interfaces.cli import CLI
+from readrag.interfaces.cli import CLI
 
 def main():
     cli = CLI()

@@ -1,13 +1,13 @@
 from pathlib import Path
 from typing import List, Dict, Any
 
-from config import settings
-from core.exceptions import BookAssistantError
-from services.processor import BookProcessor
-from services.searcher import BookSearcher
-from services.summarizer import SummaryHandler
-from services.gpt import GPTHandler
-from utils.file_handler import FileHandler
+from readrag.config import settings
+from readrag.core.exceptions import BookAssistantError
+from readrag.services.processor import BookProcessor
+from readrag.services.searcher import BookSearcher
+from readrag.services.summarizer import SummaryHandler
+from readrag.services.gpt import GPTHandler
+from readrag.utils.file_handler import FileHandler
 
 class CLI:
     def __init__(self):

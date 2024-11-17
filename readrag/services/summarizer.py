@@ -3,8 +3,8 @@ import torch
 from transformers import PreTrainedTokenizerFast, BartForConditionalGeneration
 from tqdm import tqdm
 
-from config import settings
-from core.exceptions import SummaryError
+from readrag.config import settings
+from readrag.core.exceptions import SummaryError
 
 class SummaryHandler:
     def __init__(self):

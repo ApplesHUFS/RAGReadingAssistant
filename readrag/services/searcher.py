@@ -5,12 +5,12 @@ import numpy as np
 import faiss
 from sentence_transformers import SentenceTransformer
 
-from config import settings
-from core.exceptions import SearchError
+from readrag.config import settings
+from readrag.core.exceptions import SearchError
 
 class BookSearcher:
     def __init__(self):
-        self.base_dir = settings.BASE_DIR
+        self.base_dir = settings.DATA_DIR
         self.model = SentenceTransformer(settings.EMBEDDING_MODEL)
         self.current_book: Optional[str] = None
         self.current_index = None

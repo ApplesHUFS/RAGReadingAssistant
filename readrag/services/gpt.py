@@ -3,7 +3,7 @@ import os
 from openai import OpenAI
 from dotenv import load_dotenv
 
-from core.exceptions import ProcessingError
+from readrag.core.exceptions import ProcessingError
 
 load_dotenv()
 

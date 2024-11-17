@@ -6,14 +6,14 @@ import faiss
 from sentence_transformers import SentenceTransformer
 from tqdm import tqdm
 
-from config import settings
-from core.book_metadata import BookMetadata
-from core.exceptions import ProcessingError
-from utils.file_handler import FileHandler
+from readrag.config import settings
+from readrag.core.book_metadata import BookMetadata
+from readrag.core.exceptions import ProcessingError
+from readrag.utils.file_handler import FileHandler
 
 class BookProcessor:
     def __init__(self):
-        self.base_dir = settings.BASE_DIR
+        self.base_dir = settings.DATA_DIR
         self.model = SentenceTransformer(settings.EMBEDDING_MODEL)
         self.file_handler = FileHandler(self.base_dir)
         self._load_metadata()

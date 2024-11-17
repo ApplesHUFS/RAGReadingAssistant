@@ -3,8 +3,8 @@ import json
 import shutil
 from pathlib import Path
 from typing import Dict, Any, List
-from config import settings
-from core.exceptions import FileNotFoundError
+from readrag.config import settings
+from readrag.core.exceptions import FileNotFoundError
 
 class FileHandler:
     def __init__(self, base_dir: Path):
