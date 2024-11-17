@@ -15,9 +15,8 @@ def merge_all_csv_files(directory_path):
     
     merged_df = pd.concat(dfs, ignore_index=True)
     
-    output_path = os.path.join(directory_path, 'merged_all.csv')
-    merged_df.to_csv(output_path, index=False)
-    print(f"\nMerged file saved as: {output_path}")
+    merged_df.to_csv('book_data.csv', index=False)
+    print(f"\nMerged file saved")
     print(f"Total rows: {len(merged_df)}")
     
     return merged_df

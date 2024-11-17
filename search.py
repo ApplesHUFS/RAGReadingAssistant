@@ -1,7 +1,7 @@
 from typing import List, Dict, Any
 import numpy as np
 import faiss
-from utils import get_embedding, RELEVANCE_THRESHOLD, model 
+from utils import get_embedding, RELEVANCE_THRESHOLD
 
 class FAISSIndex:
     def __init__(self):
@@ -28,7 +28,7 @@ class FAISSIndex:
         self.index.add(embeddings_array)
     
     def search(self, query: str, k: int = 5) -> List[Dict[str, Any]]:
-        query_embedding = model.encode([query], convert_to_numpy=True).astype('float32')
+        query_embedding = get_embedding(query)
         faiss.normalize_L2(query_embedding)
         
         scores, indices = self.index.search(query_embedding, k)
