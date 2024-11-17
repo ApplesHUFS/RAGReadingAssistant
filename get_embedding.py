@@ -98,7 +98,6 @@ def process_text_file(file_path: str, processor: TextProcessor) -> List[Dict]:
         
         chunk_dict = {
             "pdf_id": os.path.basename(file_path).replace('.txt', ''),
-            "page_number": 0,
             "sentence_chunk": joined_chunk,
             "chunk_char_count": len(joined_chunk),
             "chunk_word_count": len(processor.tokenizer.tokenize(joined_chunk)),
