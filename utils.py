@@ -10,7 +10,7 @@ RELEVANCE_THRESHOLD = 0.35
 model = SentenceTransformer('sentence-transformers/paraphrase-multilingual-mpnet-base-v2')
 
 def get_embedding(text: str) -> np.ndarray:
-    return model.encode([text], convert_to_numpy=True)[0]
+    return model.encode([text], convert_to_numpy=True).astype('float32')
 
 def cosine_similarity(a, b):
     return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
