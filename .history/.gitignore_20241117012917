@@ -1,0 +1,5 @@
+**pycache** 
+.history/ 
+processed_files/
+text_files/
+merge.py
