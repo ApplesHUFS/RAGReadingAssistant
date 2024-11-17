@@ -6,8 +6,8 @@ class Settings:
     
     # Directory settings
     DATA_DIR = PROJECT_ROOT / "data"
-    BOOKS_DIR = DATA_DIR / "books"         # 원본 텍스트 파일 위치
-    PROCESSED_DIR = DATA_DIR / "processed" # 처리된 데이터 위치
+    BOOKS_DIR = DATA_DIR / "books"
+    PROCESSED_DIR = DATA_DIR / "processed"
     
     # Ensure directories exist
     DATA_DIR.mkdir(exist_ok=True)

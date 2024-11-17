@@ -13,7 +13,7 @@ from readrag.utils.file_handler import FileHandler
 
 class BookProcessor:
     def __init__(self):
-        self.base_dir = settings.DATA_DIR
+        self.base_dir = settings.PROCESSED_DIR
         self.model = SentenceTransformer(settings.EMBEDDING_MODEL)
         self.file_handler = FileHandler(self.base_dir)
         self._load_metadata()
