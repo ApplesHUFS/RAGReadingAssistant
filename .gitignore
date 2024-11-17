@@ -20,8 +20,6 @@ var/
 .installed.cfg
 *.egg
 .env
-books/
-processed/
 data/
 .vscode/
 .idea/
