@@ -111,7 +111,7 @@ class BookProcessor:
         except Exception as e:
             raise ProcessingError(f"Error processing file: {e}")
             
-    def get_processed_files(self) -> Dict[str, BookMetadata]:
+    def get_processed_files(self) -> Dict[str]:
         return self.metadata
         
     def get_book_metadata(self, book_id: str) -> BookMetadata:
