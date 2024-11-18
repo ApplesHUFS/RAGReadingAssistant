@@ -33,6 +33,7 @@ wheels/
 # Project specific
 data/
 processed_books/
+node_modules/
 
 # IDE
 .vscode/

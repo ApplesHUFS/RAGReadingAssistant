@@ -18,7 +18,7 @@ class CLI:
         self.file_handler = FileHandler(settings.PROCESSED_DIR)
         
     def run(self):
-        """메인 애플리케이션 루프를 실행합니다."""
+        """메인 애플리케이션 루프"""
         while True:
             try:
                 self._show_main_menu()
@@ -41,7 +41,7 @@ class CLI:
                 print(f"\n예상치 못한 오류가 발생했습니다: {e}")
                 
     def _show_main_menu(self):
-        """메인 메뉴를 표시합니다."""
+        """메인 메뉴 표시"""
         print("\n=== 독서 도우미 시스템 ===")
         print("1. 새로운 텍스트 파일 추가")
         print("2. 기존 파일 선택")
@@ -75,7 +75,7 @@ class CLI:
             print("\n잘못된 선택입니다.")
             
     def _import_new_book(self):
-        """새 책 파일을 가져옵니다."""
+        """새 책 파일 가져오기"""
         file_path = input("\n텍스트 파일 경로를 입력하세요: ")
         if not file_path:
             return
@@ -84,7 +84,7 @@ class CLI:
             file_path = Path(file_path)
             self.file_handler.validate_file(file_path)
             imported_path = self.file_handler.import_book(file_path)
-            
+        
             print(f"\n파일을 성공적으로 가져왔습니다: {imported_path.name}")
             process_now = input("지금 처리하시겠습니까? (y/n): ")
             
@@ -95,7 +95,7 @@ class CLI:
             print(f"\n오류: {e}")
             
     def _select_existing_book(self, books: List[Dict[str, Any]]):
-        """기존 책 파일을 선택합니다."""
+        """기존 책 파일 선택"""
         try:
             idx = int(input("\n처리할 파일 번호를 선택하세요: ")) - 1
             if 0 <= idx < len(books):
@@ -106,7 +106,7 @@ class CLI:
             print("\n잘못된 입력입니다.")
             
     def _select_file(self):
-        """기존 파일을 선택하고 작업 모드를 선택합니다."""
+        """기존 파일 선택 및 작업 모드 선택"""
         metadata = self.processor.get_processed_files()
         if not metadata:
             print("\n처리된 파일이 없습니다. 새 파일을 추가해주세요.")
@@ -145,7 +145,7 @@ class CLI:
                 print("\n잘못된 선택입니다.")
                 
     def _process_selected_file(self, file_path: Path):
-        """선택된 파일을 처리합니다."""
+        """선택된 파일 처리"""
         try:
             print("\n파일 처리를 시작합니다...")
             book_id = self.processor.process_file(str(file_path))
@@ -154,7 +154,7 @@ class CLI:
             print(f"\n파일 처리 중 오류가 발생했습니다: {e}")
             
     def _chat_mode(self):
-        """선택된 파일에 대한 대화 모드를 시작합니다."""
+        """선택된 파일에 대한 대화 모드 시작"""
         book_id = self.searcher.get_current_book()
         if not book_id:
             print("선택된 책이 없습니다.")
@@ -198,7 +198,7 @@ class CLI:
                 print(f"오류가 발생했습니다: {e}")
                 
     def _summary_mode(self):
-        """선택된 파일의 요약 모드를 실행합니다."""
+        """선택된 파일의 요약 모드 실행"""
         book_id = self.searcher.get_current_book()
         if not book_id:
             print("선택된 책이 없습니다.")

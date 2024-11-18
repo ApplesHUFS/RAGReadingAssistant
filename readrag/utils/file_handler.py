@@ -12,7 +12,7 @@ class FileHandler:
         self.base_dir.mkdir(parents=True, exist_ok=True)
         
     def get_available_books(self) -> List[Dict[str, Any]]:
-        """books 디렉토리의 모든 텍스트 파일 정보를 반환합니다."""
+        """books 디렉토리의 모든 텍스트 파일 정보를 반환"""
         files = []
         for file_path in settings.BOOKS_DIR.glob('*'):
             if file_path.suffix in settings.ALLOWED_EXTENSIONS:
@@ -24,7 +24,7 @@ class FileHandler:
         return files
         
     def validate_file(self, file_path: Path) -> None:
-        """파일 유효성을 검사하고 문제가 있을 경우 예외를 발생시킵니다."""
+        """파일 유효성을 검사하고 문제가 있을 경우 예외 발생"""
         if not file_path.exists():
             raise FileNotFoundError("파일이 존재하지 않습니다.")
             
@@ -42,7 +42,7 @@ class FileHandler:
             raise FileNotFoundError("파일이 UTF-8 형식이 아닙니다.")
             
     def import_book(self, file_path: Path) -> Path:
-        """파일을 books 디렉토리로 복사합니다."""
+        """파일을 books 디렉토리로 복사."""
         target_path = settings.BOOKS_DIR / file_path.name
         
         if target_path.exists():
@@ -58,7 +58,7 @@ class FileHandler:
         return target_path
         
     def calculate_file_hash(self, file_path: str) -> str:
-        """파일의 MD5 해시를 계산합니다."""
+        """파일의 MD5 해시 계산"""
         try:
             with open(file_path, 'rb') as f:
                 return hashlib.md5(f.read()).hexdigest()
@@ -66,7 +66,7 @@ class FileHandler:
             raise FileNotFoundError(f"Error calculating file hash: {e}")
             
     def load_json(self, file_path: Path) -> Dict[str, Any]:
-        """JSON 파일을 로드합니다."""
+        """JSON 파일을 로드"""
         if not file_path.exists():
             return {}
         try:
@@ -76,7 +76,7 @@ class FileHandler:
             raise FileNotFoundError(f"Error loading JSON file: {e}")
             
     def save_json(self, file_path: Path, data: Dict[str, Any]):
-        """데이터를 JSON 파일로 저장합니다."""
+        """데이터를 JSON 파일로 저장"""
         try:
             with open(file_path, 'w', encoding='utf-8') as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
@@ -84,7 +84,7 @@ class FileHandler:
             raise FileNotFoundError(f"Error saving JSON file: {e}")
             
     def read_text_file(self, file_path: str) -> str:
-        """텍스트 파일을 읽습니다."""
+        """텍스트 파일 읽기"""
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 return f.read()
