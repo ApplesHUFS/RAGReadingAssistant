@@ -8,6 +8,7 @@
 - 의미 기반 검색 (Semantic Search)
 - GPT를 활용한 질의응답
 - 텍스트 요약 기능
+- 웹 인터페이스 지원
 
 ## 설치 방법
 
@@ -17,62 +18,74 @@ git clone https://github.com/yourusername/ReadRAG.git
 cd ReadRAG
 ```
 
-2. 필요한 패키지 설치
+2. Backend 설치 및 실행
 ```bash
+cd backend
 pip install -r requirements.txt
-```
-
-3. OpenAI API 키 설정 
-```bash
 # .env 파일에 API 키 입력
 echo "OPENAI_API_KEY=your_api_key_here" > .env
+# 서버 실행
+uvicorn app:app --reload
+```
+
+3. Frontend 설치 및 실행
+```bash
+cd frontend
+npm install
+npm start
 ```
 
 ## 디렉토리 구조
 
 ```
 ReadRAG/
-├── readrag/                # 메인 패키지
-│   ├── config/            # 설정
-│   ├── core/              # 핵심 기능
-│   ├── interfaces/        # 사용자 인터페이스
-│   ├── services/          # 주요 서비스
-│   └── utils/             # 유틸리티
+├── backend/               # 백엔드 서버
+│   ├── app.py            # FastAPI 애플리케이션
+│   ├── readrag/          # 메인 패키지
+│   │   ├── config/       # 설정
+│   │   ├── core/         # 핵심 기능
+│   │   ├── services/     # 주요 서비스
+│   │   └── utils/        # 유틸리티
+│   │
+│   └── data/             # 데이터 저장소
+│       ├── books/        # 원본 텍스트 파일
+│       └── processed/    # 처리된 데이터
 │
-├── data/                  # 데이터 저장소
-│   ├── books/            # 원본 텍스트 파일
-│   └── processed/        # 처리된 데이터
-│
-└── main.py               # 실행 파일
+└── frontend/             # 프론트엔드
+    ├── public/
+    └── src/
+        ├── components/   # React 컴포넌트
+        └── App.js        # 메인 애플리케이션
 ```
 
 ## 사용 방법
 
-1. 프로그램 실행
-```bash
-python main.py
-```
-
-2. 메인 메뉴 옵션
-- 새로운 텍스트 파일 추가
-- 기존 파일 선택
-- 종료
-
-3. 파일 처리 후 가능한 작업
-- 질문하기: 텍스트 내용에 대해 질문
-- 요약하기: 전체 내용 요약
+1. 백엔드와 프론트엔드 서버 실행
+2. 웹 브라우저에서 http://localhost:3000 접속
+3. 가능한 작업:
+   - 새 책 파일 업로드
+   - 기존 책 파일 처리
+   - 처리된 책에 대해 질문하기
+   - 책 내용 요약하기
 
 ## 주요 기술 스택
 
+### Backend
 - Python 3.8+
+- FastAPI
 - sentence-transformers: 텍스트 임베딩
 - FAISS: 벡터 유사도 검색
 - OpenAI GPT: 답변 생성
-- KoBART: 한국어 텍스트 요약
+
+### Frontend
+- React
+- TailwindCSS
+- Lucide Icons
 
 ## 필요 사항
 
 - Python 3.8 이상
+- Node.js 14 이상
 - OpenAI API 키
 - 최소 8GB RAM
 - (선택사항) CUDA 지원 GPU
