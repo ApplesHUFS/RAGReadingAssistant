@@ -12,8 +12,8 @@ class Settings:
     PROCESSED_DIR.mkdir(exist_ok=True)
     
     EMBEDDING_MODEL = 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2'
-    SUMMARY_MODEL = 'gogamza/kobart-summarization'
-    SUMMARY_TOKENIZER = 'gogamza/kobart-summarization'
+    
+    GPT_MODEL = "gpt-4o-mini" 
     
     ALLOWED_EXTENSIONS = {'.txt'}  
     MAX_FILE_SIZE = 10 * 1024 * 1024 
@@ -27,7 +27,11 @@ class Settings:
     HNSW_EF_CONSTRUCTION = 200
     HNSW_EF_SEARCH = 128
     
-    MAX_INPUT_TOKENS = 1024
-    MAX_SUMMARY_TOKENS = 128
-    MIN_SUMMARY_TOKENS = 32
-    OVERLAP_SUMMARY_TOKENS = 50
+    MAX_INPUT_TOKENS = 12000 
+    MAX_SUMMARY_TOKENS = 1000  
+    MIN_SUMMARY_TOKENS = 100 
+    OVERLAP_SUMMARY_TOKENS = 200 
+    
+    MAX_REQUESTS_PER_MINUTE = 450 
+    MAX_REQUESTS_PER_DAY = 9500   
+    MAX_TOKENS_PER_MINUTE = 180000 

@@ -55,7 +55,7 @@ class GPTHandler:
             prompt = self._create_prompt(book_title, query, contexts)
             
             response = self.client.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model="gpt-4o-mini",
                 messages=[
                     {"role": "system", "content": "당신은 책의 내용을 깊이 있게 이해하고 설명하는 독서 도우미입니다. 독자의 질문에 대해 책의 내용을 바탕으로 통찰력 있고 교육적인 답변을 제공합니다."},
                     {"role": "user", "content": prompt}
