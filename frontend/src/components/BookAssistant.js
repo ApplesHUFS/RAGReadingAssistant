@@ -26,8 +26,28 @@ function BookAssistant() {
     }
   }, [selectedBook]);
 
-  const askMode = () => {
+  const resetChat = () => {
+    setMessages([]);
+    setQuery('');
+    setMode('select');
+  };
+
+  const addModeSelection = () => {
     setMessages(prev => [...prev, {
+      type: 'assistant',
+      content: '작업을 선택해주세요:',
+      options: [
+        { label: '질문하기', value: 'chat' },
+        { label: '요약하기', value: 'summary' },
+        { label: '종료하기', value: 'exit' }
+      ]
+    }]);
+    setMode('select');
+    setQuery('');
+  };
+
+  const askMode = () => {
+    setMessages([{
       type: 'assistant',
       content: '작업을 선택해주세요:',
       options: [
@@ -77,8 +97,10 @@ function BookAssistant() {
         { type: 'user', content: '종료하기' },
         { type: 'assistant', content: '대화를 종료합니다. 새로운 대화를 시작하려면 다른 책을 선택해주세요.' }
       ]);
-      setMode('select');
-      setSelectedBook(null);
+      setTimeout(() => {
+        resetChat();
+        setSelectedBook(null);
+      }, 1000);
       return;
     }
 
@@ -118,8 +140,7 @@ function BookAssistant() {
         content: data.answer
       }]);
       
-      // 답변 후 모드 선택 다시 표시
-      setTimeout(askMode, 1000);
+      setTimeout(addModeSelection, 1000);
     } catch (error) {
       setMessages(prev => [...prev, {
         type: 'assistant',
@@ -140,8 +161,7 @@ function BookAssistant() {
         content: data.final_summary
       }]);
       
-      // 요약 후 모드 선택 다시 표시
-      setTimeout(askMode, 1000);
+      setTimeout(addModeSelection, 1000);
     } catch (error) {
       setMessages(prev => [...prev, {
         type: 'assistant',
@@ -229,7 +249,10 @@ function BookAssistant() {
               <h3 className="font-semibold mb-2">처리된 책</h3>
               <select 
                 value={selectedBook || ''} 
-                onChange={(e) => setSelectedBook(e.target.value)}
+                onChange={(e) => {
+                  setSelectedBook(e.target.value);
+                  resetChat();
+                }}
                 className="w-full p-2 border rounded"
               >
                 <option value="">처리된 책을 선택하세요...</option>
@@ -300,4 +323,4 @@ function BookAssistant() {
   );
 }
 
-export default BookAssistant;
+export default BookAssistant; 
